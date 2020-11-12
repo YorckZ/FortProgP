@@ -1,5 +1,5 @@
 package Uebung_02.Aufgabe_2;
-import java.util.concurrent.*;
+//import java.util.concurrent.*;
 
 /*
 In dieser Aufgabe sollen Sie mit der folgenden Vorlage der Account-Klasse arbeiten (der Code lässt sich per Klick auf Details anzeigen).
@@ -18,38 +18,39 @@ In dieser Aufgabe sollen Sie mit der folgenden Vorlage der Account-Klasse arbeit
 */
 
 
-/*
- * Malte fragen:
- * Aufgabe 2: Überweisung wohin?
- * Aufgabenteile 2a und 2b aufeinander aufbauend oder separat?
- * s.acquireUninterruptibly(); und return?
- * 2.4: nur technische Deadlocks?
- */
 
 public class Account {
 
     private double balance;
-    private Semaphore s = new Semaphore(1);
+//    private Semaphore s = new Semaphore(1); // Nur 1 Zugriff zur Zeit
 
+    public Account () {
+    	balance = 0.00;
+    }
+    
     public Account(double initialDeposit) {
         balance = initialDeposit;
     }
 
-//    public synchronized double getBalance() {
-//        return balance;
-//    }
-
-    // Malte fragen
-    public double getBalance() {
-        s.acquireUninterruptibly(); // P-Operation
-    	double d = balance;
-    	s.release(); // V-Operation
-    	return d;
-    }
-
-    public synchronized void deposit(double amount) {
+    public synchronized void deposit(double amount) { // !!!!
         balance += amount;
     }
+    
+    public synchronized void withdraw(double amount) { // !!!!
+    	balance -= amount;
+    }
+    
+    public double getBalance() {
+    	return balance;
+    }
+    
+//    public double getBalance() {
+//      s.acquireUninterruptibly(); // P-Operation
+//    	double d = balance;
+//    	s.release(); // V-Operation
+//    	return d;
+//    }
+
     
     
     
@@ -57,11 +58,38 @@ public class Account {
     public void transfer (int amount, Account target) {
     	// Geld auf ein anderes Konto überweisen
     	
-    	
+    	// Die Überweisung soll "uno acto" erfolgen;
+
+    	// Überweisung:
+    	while (true) {
+        	
+    		this.withdraw(amount); // in dieser Methode ungeprüft
+        	target.deposit(amount); // am Ziel unkritisch
+    		
+    	}
     }
     
-    public void safeTransfer(int amount) {
+    public void safeTransfer(int amount, Account target) {
     	// Geld auf ein anderes Konto überweisen, wenn ausreichend Deckung
+    	
+    	while (this.getBalance() < amount || amount <= 0.00 || target == this) { 
+    		try {
+    			wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} 
+		};
+
+    	// Nach dem notify: check again
+    	// Wenn mindestens so viel Guthaben besteht wie überwiesen werden soll, und
+    	// wenn unsinnige Eingaben abgefangen sind (nichtpositive Beträge, Überweisung an sich selbst)
+    	if (this.getBalance() >= amount 
+    			&& amount > 0.00
+    			&& target != this) {
+        	this.withdraw(amount);
+        	target.deposit(amount);
+    	}
+    	
     	
     }
 }
