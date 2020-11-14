@@ -1,16 +1,16 @@
-package Codesammlung;
+package Codesammlung.Nebenlaeufig;
 
 import java.util.ArrayList;
 
-public class MySemaphore {
+public class ExampleSemaphore {
 	private int Capacity;
 	private ArrayList<Object> Queue = new ArrayList<Object>(); // Warteschlange
 
-	public MySemaphore(int capacity) {
+	public ExampleSemaphore(int capacity) {
 		this.Capacity = capacity;
 	}
 	
-	public void P(Object o) {
+	public void P(Object o) { // Process o asks for access
 		if (Capacity >= 1) {
 			Capacity--;
 		}else {
@@ -37,11 +37,11 @@ public class MySemaphore {
 	
 	
 	public static void main (String[] args) {
-		MySemaphore s = new MySemaphore(1);
-		
+		ExampleSemaphore s = new ExampleSemaphore(1);
 		Object someProcess = new Object();
+		
 		s.P(someProcess);
-		// do stuff
+			// do stuff
 		s.V();
 	}
 	
