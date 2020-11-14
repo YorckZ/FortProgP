@@ -142,15 +142,16 @@ public class Buffer1<E> {
             if (empty) {
                 r.wait(timeout);
             }
-        }
-        if (empty){
-            synchronized (w) {
-                empty = true;
-                w.notify();
-                return content;
+
+            if (!empty) {
+                synchronized (w) {
+                    empty = true;
+                    w.notify();
+                    return content;
+                }
+            } else {
+                throw new TimeoutException();
             }
-        } else {
-            throw new TimeoutException();
         }
     }
 }
