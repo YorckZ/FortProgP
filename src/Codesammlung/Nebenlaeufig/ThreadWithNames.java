@@ -15,6 +15,7 @@ public class ThreadWithNames extends Thread {
 	}
 	
 	
+	@SuppressWarnings("static-access")
 	public static void main(String[] args) {
 		Thread t1 = new ExampleThread("Hallo");
 		t1.setName("Test-Thread-01");
@@ -37,6 +38,8 @@ public class ThreadWithNames extends Thread {
 		t3.setDaemon(true); // muss for start() erfolgen
 		t3.start();
 		
+		
+		// TODO: Wie beende ich Threads?
 	}
 
 }
