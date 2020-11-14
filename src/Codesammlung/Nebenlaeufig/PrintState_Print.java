@@ -9,7 +9,11 @@ public class PrintState_Print extends Thread{
 	
 	public void run() {
 		while(true) {
-			ps.printNewState();
+			try {
+				ps.printNewState();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

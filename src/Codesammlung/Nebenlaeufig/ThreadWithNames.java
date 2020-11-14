@@ -39,6 +39,11 @@ public class ThreadWithNames extends Thread {
 		t3.start();
 		
 		
+		t1.interrupt();
+		boolean b = t1.isInterrupted();
+		boolean d = t3.isDaemon();
+		
+		
 		// TODO: Wie beende ich Threads?
 	}
 
