@@ -10,6 +10,7 @@ import java.util.concurrent.TimeoutException;
  * @param <E>
  *            Type of the element
  */
+
 public class Buffer1<E> {
 
     // element + empty flag
@@ -17,8 +18,8 @@ public class Buffer1<E> {
     private boolean empty;
 
     // synchronization objects
-    private Object r = new Object();
-    private Object w = new Object();
+    private Object r = new Object(); // take thread synchronisation
+    private Object w = new Object(); // put  thread synchronisation
 
     public Buffer1() {
         empty = true;
@@ -88,10 +89,10 @@ public class Buffer1<E> {
      * @throws InterruptedException
      */
 
-    public E read() throws InterruptedException { // TODO: richtig implementiert?
-        synchronized(r) {
+    public E read() throws InterruptedException { 
+        synchronized(r) { // Synchronisation für take-Operationen
             while (empty) {
-                r.wait();
+                r.wait(); // wird durch eine put-Operation geweckt
             }
         }
         return content;
@@ -105,12 +106,18 @@ public class Buffer1<E> {
      * @return true if successful
      */
 
-    public synchronized boolean tryPut(E elem) throws InterruptedException { // TODO: richtig implementiert?
-        if(empty){
-            put(elem);
-            return true;
-        } else {
-            return false;
+    public boolean tryPut(E elem) throws InterruptedException {
+        synchronized(w){ // Synchronisation für put- und take-Operationen
+        	synchronized(r){
+	        	if(empty){ // nur einmalige Prüfung, ob Buffer leer
+		            put(elem);
+		            empty = false;
+		            r.notify(); // wecke einen take-Prozess
+		            return true;
+		        } else {
+		            return false;
+		        }
+        	}
         }
     }
 
@@ -121,7 +128,13 @@ public class Buffer1<E> {
      *            Element to overwrite with
      */
     public void overwrite(E elem) {
-        content = elem;
+	    synchronized(w) { // Synchronisation für put- und take-Operationen	
+    		synchronized(r){
+	    		content = elem;
+	    		empty = false; 
+	    		r.notify(); // wecke einen take-Prozess
+	    	}	
+	    }	
     }
 
     /**
@@ -137,20 +150,22 @@ public class Buffer1<E> {
      *             if a timeout occurred
      */
 
-    public E take(long timeout) throws InterruptedException, TimeoutException { // TODO: richtig implementiert?
-        synchronized (r) {
-            if (empty) {
-                r.wait(timeout);
-            }
-
-            if (!empty) {
-                synchronized (w) {
-                    empty = true;
-                    w.notify();
-                    return content;
+    public E take(long timeout) throws InterruptedException, TimeoutException { 
+    	synchronized (r) { // Synchronisation für take-Operationen
+            if (empty) { // zunächst einmalige Prüfung, ob leer
+            	long startTime = System.currentTimeMillis(); // messe die Systemzeit vor dem Warten
+                r.wait(timeout); // warte max. die angegebene Zeit
+                long endTime = System.currentTimeMillis(); // messe die Systemzeit nach dem Warten
+                if (endTime >= startTime + timeout || empty) { // wenn timeout abgelaufen oder Buffer immer noch leer, ...
+                	throw new TimeoutException(); // ... dann werfe Exception 
                 }
-            } else {
-                throw new TimeoutException();
+            }
+            // wenn gar nicht oder kürzer als timeout gewartet, dann geht es hier weiter
+            synchronized (w) { // sync für put-Operationen
+                empty = true;
+                w.notify(); // wecke einen put-Prozess
+                return content;
+              
             }
         }
     }
