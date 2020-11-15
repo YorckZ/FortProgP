@@ -7,7 +7,7 @@ public class BufferN<E> {
 		if (n <= 0){
 			throw new IllegalArgumentException();
 		} else {
-			this.buffer = (E[]) new Object[n];
+			this.buffer = (E[]) new Object[n]; // es wird ein Array der Länge n (Kapazität) vom Typ E angelegt
 		}
 	}
 	
@@ -40,6 +40,7 @@ public class BufferN<E> {
 		for (int i = 0; i < this.buffer.length; i++){ // Der Eintrag wird an die erste "leere" Position des Arrays geschrieben
 			if(this.buffer[i] == null){
 				this.buffer[i] = elem;
+				break;
 			}
 		}
 		notifyAll();
@@ -60,7 +61,7 @@ public class BufferN<E> {
 		
 		if (buffer[buffer.length - 1] == null) { // Wenn der letzte Eintrag im Buffer null ist, so ist der Buffer nicht voll
 			return false;
-		} else {		
+		} else { // andernfalls ist er voll
 		return true;
 		}
 	}
