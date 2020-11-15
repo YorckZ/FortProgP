@@ -51,7 +51,7 @@ public class BufferN<E> {
 
 		if (this.buffer[0] == null) { // Da immer an die erste leere Position geschrieben und nach dem Entnehmen die Einträge an den Anfang des Buffers verschoben werden, ...
 			return true;			  // ... reicht die Feststellung, dass der erste Eintrag im Buffer leer ist
-		}else {
+		} else {
 			return false;
 		}
 	}

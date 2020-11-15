@@ -90,12 +90,14 @@ public class Buffer1<E> {
      */
 
     public E read() throws InterruptedException { 
-        synchronized(r) { // Synchronisation für take-Operationen
+        E retObj = null;
+    	synchronized(r) { // Synchronisation für take-Operationen
             while (empty) {
                 r.wait(); // wird durch eine put-Operation geweckt
             }
+            retObj = content;
         }
-        return content;
+        return retObj;
     }
 
     /**
@@ -164,8 +166,7 @@ public class Buffer1<E> {
             synchronized (w) { // sync für put-Operationen
                 empty = true;
                 w.notify(); // wecke einen put-Prozess
-                return content;
-              
+                return content;              
             }
         }
     }
